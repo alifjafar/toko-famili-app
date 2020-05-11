@@ -36,6 +36,7 @@ class _AppState extends State<App> {
       theme: ThemeData(
         primaryColor: ColorBase.primary,
         primaryColorBrightness: Brightness.light,
+        accentColor: ColorBase.primary,
         fontFamily: 'NunitoSans'
       ),
       home: SplashScreen(),

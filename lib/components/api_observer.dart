@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:famili/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:rxdart/rxdart.dart';
 
 import 'loading.dart';
 
@@ -35,6 +36,10 @@ class ApiObserver<T> extends StatelessWidget {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Visibility(
+                visible: (stream is ValueStream) ? (stream as ValueStream).hasValue : false,
+                child: onSuccess(context, (stream as ValueStream).value),
+              ),
               SizedBox(
                   height: 100.0,
                   child: Lottie.asset(
@@ -72,6 +77,7 @@ class ApiObserver<T> extends StatelessWidget {
       stream: stream,
       builder: (context, AsyncSnapshot<T> snapshot) {
         if (snapshot.hasError) {
+          print(snapshot.error);
           if (snapshot.error is SocketException) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Scaffold.of(context)
@@ -89,6 +95,7 @@ class ApiObserver<T> extends StatelessWidget {
                   backgroundColor: Colors.red,
                 ));
             });
+            print(snapshot.error);
 
             return _defaultOnSocketException(
                 context, snapshot.error.toString());

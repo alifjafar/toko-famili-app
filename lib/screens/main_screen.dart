@@ -92,7 +92,7 @@ class _MainScreenState extends State<MainScreen> {
           icon: Icon(Icons.account_circle, size: Dimens.navBarIconSize),
           title: Column(children: <Widget>[
             SizedBox(height: Dimens.navBarBoxSize),
-            Text(Constant.profile),
+            Text(Constant.account),
           ]))
     ];
 

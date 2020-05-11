@@ -7,6 +7,6 @@ class BaseResponse {
   BaseResponse(this.message, this.meta);
 
   BaseResponse.fromJson(Map<String, dynamic> json)
-    : message = json['message'],
-      meta = Meta.fromJson(json['meta']);
+      : message = json['message'],
+        meta = Meta.fromJson(json['meta']);
 }

@@ -2,14 +2,14 @@ import 'package:dio/dio.dart';
 import 'package:famili/core/exceptions/api_exception.dart';
 import 'package:rxdart/rxdart.dart';
 
-void rxApi<T>({Future<dynamic> repository,
-  Subject<T> subject,
-  bool clear = false}) async {
+void rxApi<T>(
+    {Future<dynamic> repository,
+    Subject<T> subject,
+    bool clear = false}) async {
   try {
     if (clear) {
       subject.sink.add(null);
-    }
-    else {
+    } else {
       _checkSubjectValue(subject);
     }
     var response = await repository;
@@ -22,7 +22,7 @@ void rxApi<T>({Future<dynamic> repository,
 }
 
 void _checkSubjectValue(dynamic subject) {
-  if(subject is BehaviorSubject && subject.hasValue) {
+  if (subject is BehaviorSubject && subject.hasValue) {
     subject.sink.add(null);
   }
 }
