@@ -37,7 +37,10 @@ class _AppState extends State<App> {
         primaryColor: ColorBase.primary,
         primaryColorBrightness: Brightness.light,
         accentColor: ColorBase.primary,
-        fontFamily: 'NunitoSans'
+        fontFamily: 'NunitoSans',
+        textTheme: TextTheme(
+          bodyText2: TextStyle(fontWeight: FontWeight.w600)
+        )
       ),
       home: SplashScreen(),
       debugShowCheckedModeBanner: false,

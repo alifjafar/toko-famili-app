@@ -28,9 +28,16 @@ class ProductGrid extends StatelessWidget {
                 textAlign: TextAlign.start,
                 maxLines: 1,
                 textDirection: TextDirection.ltr);
-            tp.layout(maxWidth: size.maxWidth / 1.1);
+            tp.layout(maxWidth: size.maxWidth / 1.8);
             return Container(
-              height: tp.didExceedMaxLines ? 250 : 220,
+              decoration: BoxDecoration(boxShadow: [
+                BoxShadow(
+                  blurRadius: 20.0,
+                  color: Colors.black.withOpacity(.2),
+                  spreadRadius: -20,
+                ),
+              ], borderRadius: BorderRadius.circular(12.0)),
+              height: tp.didExceedMaxLines ? 240 : 220,
               child: ProductItem(product: productList.data[index]),
             );
           }),
@@ -38,24 +45,13 @@ class ProductGrid extends StatelessWidget {
           crossAxisSpacing: 2,
           mainAxisSpacing: 10,
         ),
-//        Wrap(
-//          spacing: 5,
-//          children: List.generate(productList.data.length, (index) {
-//            Product product = productList.data[index];
-//            return LayoutBuilder(
-//              builder: (context, constraints) {
-//                return Container(
-//                    width: constraints.maxWidth / 2 - 10,
-//                    child: ProductItem(
-//                      product: product,
-//                    ));
-//              },
-//            );
-//          }),
-//        ),
         Visibility(
           visible: productList.isLoading,
           child: circularLoading(),
+        ),
+        Visibility(
+          visible: productList.isLoading,
+          child: SizedBox(height: 50),
         )
       ],
     );

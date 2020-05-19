@@ -146,15 +146,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 )
             ),
-            ApiObserver(
-              stream: homeBloc.productsSubject.stream,
-              onSuccess: (context, ProductPaginate response) =>
-                  ProductGrid(
-                    response,
-                  ),
-              onErrorReload: () {
-                  homeBloc.getProducts(page: homeBloc.lastPage);
-              },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: ApiObserver(
+                stream: homeBloc.productsSubject.stream,
+                onSuccess: (context, ProductPaginate response) =>
+                    ProductGrid(
+                      response,
+                    ),
+                onErrorReload: () {
+                    homeBloc.getProducts(page: homeBloc.lastPage);
+                },
+              ),
             ),
           ],
         ));
@@ -223,8 +226,8 @@ class _HomeScreenState extends State<HomeScreen> {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                   color: Colors.black54,
-                  fontSize: 16,
-                  fontWeight: FontWeight.normal)),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600)),
         )
       ]),
       decoration: BoxDecoration(

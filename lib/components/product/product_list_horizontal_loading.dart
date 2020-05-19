@@ -2,15 +2,27 @@ import 'package:flutter/material.dart';
 import '../skeleton.dart';
 
 class ProductListHorizontalLoading extends StatelessWidget {
+  bool withHeading;
+
+  ProductListHorizontalLoading() {
+    withHeading = true;
+  }
+
+  ProductListHorizontalLoading.withoutHeading() {
+    withHeading = false;
+  }
 
   _buildLoading(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Padding(
-        padding: const EdgeInsets.only(left: 8.0, bottom: 6.0),
-        child: Skeleton(
-          height: 20.0,
-          width: MediaQuery.of(context).size.width / 4,
-          padding: 10.0,
+      Visibility(
+        visible: withHeading,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 8.0, bottom: 6.0),
+          child: Skeleton(
+            height: 20.0,
+            width: MediaQuery.of(context).size.width / 4,
+            padding: 10.0,
+          ),
         ),
       ),
       Container(height: 200.0, child: _buildProductItemLoading())
@@ -47,8 +59,7 @@ class ProductListHorizontalLoading extends StatelessWidget {
                               topRight: Radius.circular(6.0),
                               topLeft: Radius.circular(6.0)),
                           child: Skeleton(
-                              height: 100.0,
-                              width: mediaQuery.size.width),
+                              height: 100.0, width: mediaQuery.size.width),
                         ),
                       ],
                     )),
@@ -56,8 +67,7 @@ class ProductListHorizontalLoading extends StatelessWidget {
                         padding:
                             EdgeInsets.only(right: 8.0, left: 8.0, top: 6.0),
                         child: Skeleton(
-                            height: 12.0,
-                            width: mediaQuery.size.width / 4)),
+                            height: 12.0, width: mediaQuery.size.width / 4)),
                     Padding(
                         padding:
                             EdgeInsets.only(right: 8.0, left: 8.0, top: 8.0),

@@ -16,7 +16,6 @@ class ProductItem extends StatelessWidget {
   Widget build(BuildContext context) {
     double imageHeight = 120.00;
     return Card(
-        elevation: 1.5,
         child: GestureDetector(
           child: Column(
             mainAxisSize: MainAxisSize.min,

@@ -61,7 +61,7 @@ class AppBarMV extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
         title: titleWidget != null ? titleWidget : Text(
           title ?? "",
-          style: TextStyle(color: color),
+          style: TextStyle(color: color, fontWeight: FontWeight.bold),
         ),
         leading: leading ?? null,
         centerTitle: centerTitle,

@@ -77,7 +77,6 @@ class ApiObserver<T> extends StatelessWidget {
       stream: stream,
       builder: (context, AsyncSnapshot<T> snapshot) {
         if (snapshot.hasError) {
-          print(snapshot.error);
           if (snapshot.error is SocketException) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Scaffold.of(context)
@@ -95,8 +94,6 @@ class ApiObserver<T> extends StatelessWidget {
                   backgroundColor: Colors.red,
                 ));
             });
-            print(snapshot.error);
-
             return _defaultOnSocketException(
                 context, snapshot.error.toString());
           }

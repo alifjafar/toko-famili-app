@@ -6,7 +6,7 @@ import 'package:famili/core/data/response/product_response.dart';
 import 'package:famili/core/exceptions/api_exception.dart';
 import 'package:sprintf/sprintf.dart';
 
-class ProductRepository{
+class ProductRepository {
   final Dio client = Client.create();
 
   Future<ProductCollection> getProducts(
@@ -28,8 +28,7 @@ class ProductRepository{
 
   Future<ProductResponse> getProduct(String id) async {
     try {
-      var response =
-      await client.get(sprintf(ProductConstant.getSingle, [id]));
+      var response = await client.get(sprintf(ProductConstant.getSingle, [id]));
       print(response);
       return ProductResponse.fromJson(response.data);
     } on DioError catch (error) {
@@ -40,8 +39,21 @@ class ProductRepository{
   Future<ProductPriceCollection> getProductPrice(String id) async {
     try {
       var response =
-      await client.get(sprintf(ProductConstant.getProductPrice, [id]));
+          await client.get(sprintf(ProductConstant.getProductPrice, [id]));
       return ProductPriceCollection.fromJson(response.data);
+    } on DioError catch (error) {
+      throw ApiException.parseError(error);
+    }
+  }
+
+  Future<ProductCollection> getRelatedProducts(String id,
+      {int limit = 6, int page}) async {
+    try {
+      final queryParams = <String, dynamic>{'limit': limit, 'page': page};
+      var response = await client.get(
+          sprintf(ProductConstant.getRelatedProducts, [id]),
+          queryParameters: queryParams);
+      return ProductCollection.fromJson(response.data);
     } on DioError catch (error) {
       throw ApiException.parseError(error);
     }
@@ -52,4 +64,5 @@ class ProductConstant {
   static const String getProduct = "products";
   static const String getSingle = "products/%s";
   static const String getProductPrice = "products/%s/prices";
+  static const String getRelatedProducts = "products/%s/related";
 }

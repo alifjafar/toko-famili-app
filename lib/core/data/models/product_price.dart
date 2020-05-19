@@ -8,11 +8,11 @@ class ProductPrice {
 
   ProductPrice(
       {this.id,
-        this.name,
-        this.price,
-        this.priceFormat,
-        this.unit,
-        this.maxQty});
+      this.name,
+      this.price,
+      this.priceFormat,
+      this.unit,
+      this.maxQty});
 
   ProductPrice.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -32,5 +32,32 @@ class ProductPrice {
     data['unit'] = this.unit;
     data['max_qty'] = this.maxQty;
     return data;
+  }
+}
+
+class QuantityCounter {
+  int quantity;
+  int maxQuantity;
+
+  QuantityCounter({this.quantity = 1, this.maxQuantity = 1});
+
+  void plusQty() {
+    if (maxQuantity > quantity) {
+      quantity++;
+    }
+  }
+
+  void minusQty() {
+    if (quantity > 1) {
+      quantity--;
+    }
+  }
+
+  void setMaxQuantity(int value) {
+    maxQuantity = value;
+  }
+
+  void setQuantity(int value) {
+    quantity = value;
   }
 }

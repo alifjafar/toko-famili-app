@@ -105,8 +105,8 @@ flutter:
         - asset: fonts/NunitoSans-Italic.ttf
           style: italic
         - asset: fonts/NunitoSans-SemiBold.ttf
-          weight: 500
+          weight: 600
         - asset: fonts/NunitoSans-Bold.ttf
           weight: 700
         - asset: fonts/NunitoSans-ExtraBold.ttf
-          weight: 900
+          weight: 800

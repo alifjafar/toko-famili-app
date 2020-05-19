@@ -4,11 +4,14 @@ import 'package:famili/components/app_bar.dart';
 import 'package:famili/components/carousel_pro.dart';
 import 'package:famili/components/image_item.dart';
 import 'package:famili/components/key_value_item.dart';
+import 'package:famili/components/product/product_list_horizontal.dart';
+import 'package:famili/components/product/product_list_horizontal_loading.dart';
 import 'package:famili/components/skeleton.dart';
 import 'package:famili/constants/colors.dart';
 import 'package:famili/constants/constants.dart';
 import 'package:famili/core/data/models/product.dart';
 import 'package:famili/core/data/models/product_price.dart';
+import 'package:famili/core/data/response/product_collection.dart';
 import 'package:famili/core/data/response/product_price_collection.dart';
 import 'package:famili/core/data/response/product_response.dart';
 import 'package:famili/core/navigation_service.dart';
@@ -30,57 +33,28 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   double scrollConstraint = 110;
+  var productDetailBloc = ProductDetailScreenBloc();
 
   @override
   void initState() {
     super.initState();
     productDetailBloc.getProductById(widget.id);
     productDetailBloc.getProductPrice(widget.id);
+    productDetailBloc.getRelatedProductById(widget.id);
   }
 
   @override
   Widget build(BuildContext context) {
     Size _size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[buildSliverApp(context)];
-        },
-        body: buildStream(context),
-      ),
-      bottomNavigationBar: Container(
-        width: _size.width,
-        height: 50,
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(width: 0.7, color: ColorBase.whiteGray),
-          ),
-          color: Colors.white,
+        backgroundColor: Colors.white,
+        body: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[buildSliverApp(context)];
+          },
+          body: buildStream(context),
         ),
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            SizedBox(
-              width: _size.width / 1.09,
-              child: FlatButton(
-                color: ColorBase.primary,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6.0)),
-                onPressed: () {},
-                child: Text(
-                  "Tambah Ke Keranjang",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
+        bottomNavigationBar: _buildBottomContainer(_size));
   }
 
   Widget buildSliverApp(BuildContext context) {
@@ -129,7 +103,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               brightness: brightness,
               backgroundColor: Colors.white,
               iconTheme: IconThemeData(color: uiModel.iconColor),
-              title: Text(uiModel.title),
+              title: Text(uiModel.title,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               actions: <Widget>[
                 Badge(
                   badgeContent: Text(
@@ -185,25 +160,34 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
           ),
           Container(
-            margin:
-                EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0, bottom: 6.0),
-            child: StreamBuilder<ProductPrice>(
-                stream: productDetailBloc.currentPriceSubject.stream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    var price = snapshot.data;
-                    return Text(
-                      sprintf(Constant.baseCurrency,
-                          [price.priceFormat, price.unit]),
-                      style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600,
-                          color: ColorBase.redOrange),
-                    );
-                  } else {
-                    return Skeleton(height: 20);
-                  }
-                }),
+            margin: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 6.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Expanded(
+                  child: StreamBuilder<ProductPrice>(
+                      stream: productDetailBloc.currentPriceSubject.stream,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          var price = snapshot.data;
+                          return Text(
+                            sprintf(Constant.baseCurrency,
+                                [price.priceFormat, price.unit]),
+                            style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w600,
+                                color: ColorBase.redOrange),
+                          );
+                        } else {
+                          return Skeleton(height: 20);
+                        }
+                      }),
+                ),
+                Expanded(
+                  child: _buildCounter(),
+                ),
+              ],
+            ),
           ),
           _buildProductPrice(),
           Divider(
@@ -213,13 +197,27 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           Container(
             margin: EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0),
             child: Text(
-              "Informasi Produk",
-              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+              Constant.informationProduct,
+              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700),
             ),
           ),
           KeyValueItem(
             left: Text(Constant.category),
             right: Text(product.category.name),
+          ),
+          KeyValueItem(
+            left: Text(Constant.stock),
+            right: StreamBuilder<ProductPrice>(
+                stream: productDetailBloc.currentPriceSubject.stream,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    var price = snapshot.data;
+                    return Text(
+                        "${price.maxQty} ${price.name.split(" (").first}");
+                  } else {
+                    return Text("-");
+                  }
+                }),
           ),
           Divider(
             color: ColorBase.whiteGray,
@@ -234,6 +232,82 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     text: product.description,
                     style: TextStyle(color: Colors.black)),
               )),
+          Divider(
+            color: ColorBase.whiteGray,
+            thickness: 6.0,
+          ),
+          ApiObserver<ProductCollection>(
+            stream: productDetailBloc.relatedProductSubject.stream,
+            onSuccess: (context, response) => ProductListHorizontalItem(
+              response,
+              Constant.otherProduct,
+              titlePadding: EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0),
+              titleColor: Colors.black87,
+              onTap: null,
+            ),
+            onWaiting: (context) => ProductListHorizontalLoading(),
+            onErrorReload: () {
+              productDetailBloc.getRelatedProductById(widget.id);
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomContainer(Size size) {
+    return Container(
+      width: size.width,
+      height: 60,
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(width: 0.7, color: ColorBase.whiteGray),
+        ),
+        color: Colors.white,
+      ),
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          SizedBox(
+            width: size.width / 1.6,
+            child: FlatButton(
+              color: ColorBase.primary,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6.0)),
+              onPressed: () {},
+              child: Text(
+                Constant.buyNow,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          FlatButton(
+              color: Colors.orange[900],
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6.0)),
+              onPressed: () {},
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.add,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  Text(
+                    Constant.cart,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
+                ],
+              )),
         ],
       ),
     );
@@ -247,6 +321,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       onErrorReload: () {
         productDetailBloc.getProductPrice(widget.id);
       },
+      onWaiting: (context) => Container(
+        margin: EdgeInsets.symmetric(horizontal: 16.0),
+        child: Skeleton(height: 20),
+      ),
     );
   }
 
@@ -254,46 +332,65 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     productDetailBloc.changeCurrentPrice(prices.data.first);
 
     return Visibility(
-      visible: prices.data.isNotEmpty,
+      visible: prices.data.length > 1,
       child: GestureDetector(
         onTap: () => _showBottomSheet(prices),
-        child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Container(
-            padding: EdgeInsets.all(8.0),
-            child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  StreamBuilder<ProductPrice>(
-                      stream: productDetailBloc.currentPriceSubject.stream,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return Text("Per ${snapshot.data.name}",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.normal));
-                        } else {
-                          return Skeleton(height: 20);
-                        }
-                      }),
-                  SizedBox(
-                      height: 24,
-                      child: Icon(
-                        Icons.keyboard_arrow_down,
-                        color: Colors.black54,
-                      )),
-                ]),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: ColorBase.whiteGray,
-                boxShadow: [
-                  BoxShadow(
-                    offset: Offset(0, 0),
-                    color: Colors.black12,
-                  ),
-                ]),
-          ),
+                children: <Widget>[
+                  Text("Ganti Harga",
+                      style: TextStyle(
+                          color: ColorBase.primary,
+                          fontWeight: FontWeight.bold)),
+                  Text("(tersedia ${prices.data.length} harga)",
+                      style: TextStyle(color: Colors.black54))
+                ],
+              ),
+            ),
+//            Container(
+//              margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 3.0),
+//              child: Container(
+//                padding: EdgeInsets.all(8.0),
+//                child: Row(
+//                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                    children: [
+//                      StreamBuilder<ProductPrice>(
+//                          stream: productDetailBloc.currentPriceSubject.stream,
+//                          builder: (context, snapshot) {
+//                            if (snapshot.hasData) {
+//                              return Text("Per ${snapshot.data.name}",
+//                                  style: TextStyle(
+//                                      color: Colors.black,
+//                                      fontSize: 16,
+//                                      fontWeight: FontWeight.normal));
+//                            } else {
+//                              return Skeleton(height: 20);
+//                            }
+//                          }),
+//                      SizedBox(
+//                          height: 24,
+//                          child: Icon(
+//                            Icons.keyboard_arrow_down,
+//                            color: Colors.black54,
+//                          )),
+//                    ]),
+//                decoration: BoxDecoration(
+//                    borderRadius: BorderRadius.circular(8),
+//                    color: ColorBase.whiteGray,
+//                    boxShadow: [
+//                      BoxShadow(
+//                        offset: Offset(0, 0),
+//                        color: Colors.black12,
+//                      ),
+//                    ]),
+//              ),
+//            ),
+          ],
         ),
       ),
     );
@@ -314,7 +411,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 onPressed: () => Navigator.of(context).pop(),
               )),
           body: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
               scrollDirection: Axis.vertical,
               itemCount: prices.length,
               controller: scrollController,
@@ -323,17 +419,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 return Column(
                   children: <Widget>[
                     ListTile(
+                      dense: false,
                       contentPadding:
                           EdgeInsets.symmetric(vertical: 0, horizontal: 16.0),
                       selected: isCurrentPriceId(item.id),
-                      title: Text(item.name),
-                      trailing: isCurrentPriceId(item.id) ? Icon(Icons.check) : null,
+                      title: Text(item.name,
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text("Rp${item.priceFormat}"),
+                      trailing:
+                          isCurrentPriceId(item.id) ? Icon(Icons.check) : null,
                       onTap: () {
                         productDetailBloc.changeCurrentPrice(item);
                         locator<NavigationService>().navigateBack();
                       },
                     ),
-                    Divider()
+                    Divider(
+                      height: 1,
+                      thickness: 0.5,
+                    )
                   ],
                 );
               }),
@@ -371,5 +474,77 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 )),
       ),
     );
+  }
+
+  Widget _buildCounter() {
+    return StreamBuilder<QuantityCounter>(
+        stream: productDetailBloc.productQuantitySubject.stream,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                GestureDetector(
+                  child: Container(
+                    padding: EdgeInsets.all(2.0),
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[300], width: 2.0),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(6.0),
+                          bottomLeft: Radius.circular(6.0),
+                        ),
+                        shape: BoxShape.rectangle,
+                        color: ColorBase.whiteGray),
+                    child: Icon(
+                      Icons.remove,
+                      color: productDetailBloc.currentQty > 1
+                          ? Colors.grey[800]
+                          : Colors.grey[400],
+                    ),
+                  ),
+                  onTap: () => productDetailBloc.minusQuantity(),
+                ),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),
+                  decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(color: Colors.grey[300], width: 2.0),
+                        bottom: BorderSide(color: Colors.grey[300], width: 2.0),
+                      ),
+                      shape: BoxShape.rectangle),
+                  child: Text(
+                    "${snapshot.data.quantity}",
+                    style: TextStyle(fontSize: 17.5),
+                  ),
+                ),
+                GestureDetector(
+                  child: Container(
+                    padding: EdgeInsets.all(2.0),
+                    margin: EdgeInsets.only(right: 16),
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[300], width: 2.0),
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(6.0),
+                          bottomRight: Radius.circular(6.0),
+                        ),
+                        shape: BoxShape.rectangle,
+                        color: ColorBase.whiteGray),
+                    child: Icon(
+                      Icons.add,
+                      color: productDetailBloc.maxQty >
+                              productDetailBloc.currentQty
+                          ? Colors.grey[800]
+                          : Colors.grey[400],
+                    ),
+                  ),
+                  onTap: () => productDetailBloc.plusQuantity(),
+                ),
+              ],
+            );
+          } else {
+            return Skeleton(height: 20);
+          }
+        });
   }
 }

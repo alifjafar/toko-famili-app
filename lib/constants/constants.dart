@@ -25,4 +25,9 @@ class Constant {
    static final String lostConnection = 'Sepertinya Internet Kamu Terputus :(';
    static final String noConnection = 'Tidak Ada Koneksi Internet';
    static final String searchPlaceholder = 'Mau Cari Apa?';
+   static final String cart = 'Keranjang';
+   static final String buyNow = 'Beli Sekarang';
+   static final String informationProduct = 'Informasi Produk';
+   static final String otherProduct = 'Produk Lainnya';
+   static final String stock = 'Stok';
 }
